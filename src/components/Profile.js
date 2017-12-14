@@ -3,38 +3,45 @@ import { Button, Image, Title } from 'reactbulma'
 
 class Profile extends Component {
 	state = {
-		user: null
+		users: null,
+		currentUser: 1
 	}
 
-	getNextUser = () => {
+	getUsers = () => {
 		
 		this.setState({
 			user: null
 		})
 
-		fetch('https://randomuser.me/api/')
+		fetch('https://randomuser.me/api/?results=50')
 			.then(response => {
 				return response.json()
 			})
 			.then(users => {
 				this.setState({
-					user: users.results[0]
+					users: users.results
 				})
-				this.props.incrementViewed()
 			})
 	}
 
+	getNextUser = () => {
+		this.setState(prevState => ({
+			currentUser: prevState.currentUser + 1
+		}))
+		this.props.incrementViewed()
+	}
+
   render() {
-  	const { user } = this.state
+  	const { users, currentUser } = this.state
     return (
       <div>
-      	{ !user ? (<p>Loading...</p>) : (
+      	{ !users ? (<p>Loading...</p>) : (
       		<div>
 	      		<Image 
 	      			className="profile-img" 
 	      			is="128x128" 
-	      			src={user.picture.medium}/>
-	      		<Title className='profile-name' is='4'>{user.name.first} {user.name.last}</Title>
+	      			src={users[currentUser].picture.medium}/>
+	      		<Title className='profile-name' is='4'>{users[currentUser].name.first} {users[currentUser].name.last}</Title>
 	      		<hr/>
 	      		{ (this.props.viewed < this.props.maxViewed) && <Button onClick={this.getNextUser} warning>NEXT</Button>}
 	      	</div>
@@ -44,7 +51,7 @@ class Profile extends Component {
   }
 
   componentDidMount() {
-  	this.getNextUser()
+  	this.getUsers()
   }
 }
 
